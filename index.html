@@ -52,6 +52,15 @@
       letter-spacing: -0.01em;
     }
 
+    #about-link {
+      font-size: 13px;
+      color: #71717a;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    #about-link:hover { color: #a1a1aa; }
+
     #model-select {
       padding: 5px 10px;
       border: 1px solid #3f3f46;
@@ -528,6 +537,7 @@
   <div id="main-chat">
     <div id="main-header">
       <h1>Tangent</h1>
+      <a id="about-link" href="/about">About</a>
       <select id="model-select">
         <option value="anthropic/claude-sonnet-4.6">Claude Sonnet 4.6</option>
         <option value="anthropic/claude-opus-4.7">Claude Opus 4.7</option>
