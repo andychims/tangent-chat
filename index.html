@@ -708,9 +708,27 @@ function appendMainMessage(role, content, isStreaming = false) {
   return bubble;
 }
 
+const DEMO_LIMIT = 10;
+const DEMO_WARN_AT = 7;
+
+function userTurnCount() {
+  return mainMessages.filter(m => m.role === 'user').length;
+}
+
+function showDemoNotice(msg) {
+  const existing = document.getElementById('demo-notice');
+  if (existing) existing.remove();
+  const el = document.createElement('div');
+  el.id = 'demo-notice';
+  el.textContent = msg;
+  el.style.cssText = 'text-align:center;padding:10px 16px;font-size:13px;color:#a78bfa;background:#1a1625;border-top:1px solid #2d2040;flex-shrink:0;';
+  document.getElementById('main-input-area').prepend(el);
+}
+
 async function sendMainMessage() {
   const text = mainInput.value.trim();
   if (!text || isMainStreaming) return;
+  if (userTurnCount() >= DEMO_LIMIT) return;
 
   mainInput.value = '';
   autoResize(mainInput);
@@ -730,8 +748,18 @@ async function sendMainMessage() {
   }
 
   isMainStreaming = false;
-  mainSendBtn.disabled = false;
-  mainInput.focus();
+  const turns = userTurnCount();
+  if (turns >= DEMO_LIMIT) {
+    mainSendBtn.disabled = true;
+    mainInput.disabled = true;
+    showDemoNotice('Demo limit reached (10 chat turns). Clone the repo to run your own instance.');
+  } else {
+    mainSendBtn.disabled = false;
+    if (turns >= DEMO_WARN_AT) {
+      showDemoNotice(`Demo is limited to 10 chat turns — you've used ${turns}.`);
+    }
+    mainInput.focus();
+  }
 }
 
 // ── Selection & fork popover ───────────────────────────────────────────────
