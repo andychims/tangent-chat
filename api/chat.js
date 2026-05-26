@@ -42,8 +42,8 @@ Answer the user's question about this highlighted passage. Use the full parent c
       headers: {
         'Authorization': `Bearer ${key}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://forkchat.vercel.app',
-        'X-Title': 'Fork Chat',
+        'HTTP-Referer': 'https://tangent-chat.vercel.app',
+        'X-Title': 'Tangent',
       },
       body: JSON.stringify(body),
     });
