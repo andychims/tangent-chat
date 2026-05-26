@@ -1,4 +1,4 @@
-# Fork Chat
+# Tangent
 
 A chat interface for LLMs with a key differentiator: you can highlight any text in a response and open a parallel **sub-chat** about that specific passage. Multiple sub-chats can be open simultaneously, each anchored to a highlighted excerpt, all sharing the parent conversation as context.
 
