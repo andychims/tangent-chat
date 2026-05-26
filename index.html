@@ -527,11 +527,81 @@
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: #52525b; }
+
+    /* ── Tab bar (mobile only) ──────────────────────────────── */
+
+    #tab-bar { display: none; }
+
+    @media (max-width: 768px) {
+      #tab-bar {
+        display: flex;
+        background: #111113;
+        border-bottom: 1px solid #2d2d33;
+        flex-shrink: 0;
+        order: -1;
+      }
+
+      .tab-btn {
+        flex: 1;
+        padding: 13px 12px;
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 500;
+        color: #71717a;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        transition: color 0.15s, border-color 0.15s;
+      }
+
+      .tab-btn.active {
+        color: #f4f4f5;
+        border-bottom-color: #a78bfa;
+      }
+
+      .fork-badge {
+        background: #a78bfa;
+        color: #111113;
+        font-size: 11px;
+        font-weight: 700;
+        border-radius: 10px;
+        padding: 1px 6px;
+        line-height: 1.5;
+      }
+
+      #app {
+        flex-direction: column;
+      }
+
+      #main-chat {
+        width: 100%;
+        min-width: 0;
+        border-right: none;
+      }
+
+      #right-header { display: none; }
+
+      #app[data-tab="main"] #right-panel { display: none; }
+      #app[data-tab="forks"] #main-chat { display: none; }
+    }
   </style>
 </head>
 <body>
 
-<div id="app">
+<div id="app" data-tab="main">
+
+  <div id="tab-bar">
+    <button id="tab-main" class="tab-btn active" onclick="switchTab('main')">Main</button>
+    <button id="tab-forks" class="tab-btn" onclick="switchTab('forks')">
+      Forks
+      <span id="fork-badge" class="fork-badge" style="display:none">0</span>
+    </button>
+  </div>
 
   <!-- Main chat -->
   <div id="main-chat">
@@ -615,6 +685,21 @@ const emptyState  = document.getElementById('empty-state');
 const forkPopover = document.getElementById('fork-popover');
 const forkBtn     = document.getElementById('fork-btn');
 const closedDivider = document.getElementById('closed-divider');
+
+// ── Tab switching (mobile) ─────────────────────────────────────────────────
+
+function switchTab(tab) {
+  document.getElementById('app').dataset.tab = tab;
+  document.getElementById('tab-main').classList.toggle('active', tab === 'main');
+  document.getElementById('tab-forks').classList.toggle('active', tab === 'forks');
+}
+
+function updateForkBadge() {
+  const count = subChats.filter(s => !s.closed).length;
+  const badge = document.getElementById('fork-badge');
+  badge.textContent = count;
+  badge.style.display = count > 0 ? '' : 'none';
+}
 
 // ── Utilities ──────────────────────────────────────────────────────────────
 
@@ -833,6 +918,8 @@ function forkChat() {
   });
 
   buildSubChatCard(sc);
+  if (window.innerWidth <= 768) switchTab('forks');
+  updateForkBadge();
 }
 
 function buildSubChatCard(sc) {
@@ -1016,6 +1103,7 @@ function closeCard(sc, card, sizeBtns) {
     subChats = subChats.filter(s => s.id !== sc.id);
     if (closedCardCount() === 0) closedDivider.style.display = 'none';
     if (activeCardCount() === 0) emptyState.style.display = '';
+    updateForkBadge();
   });
 
   reopenBtns.appendChild(reopenBtn);
@@ -1026,6 +1114,7 @@ function closeCard(sc, card, sizeBtns) {
   subchatList.appendChild(card);
 
   if (activeCardCount() === 0) emptyState.style.display = '';
+  updateForkBadge();
 }
 
 function reopenCard(sc, card, reopenBtns, sizeBtns) {
@@ -1044,6 +1133,7 @@ function reopenCard(sc, card, reopenBtns, sizeBtns) {
   if (closedCardCount() === 0) closedDivider.style.display = 'none';
 
   emptyState.style.display = 'none';
+  updateForkBadge();
   card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
