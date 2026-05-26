@@ -9,7 +9,7 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html, body { height: 100%; }
+    html, body { height: 100%; overflow: hidden; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
@@ -21,7 +21,7 @@
 
     #app {
       display: flex;
-      height: 100vh;
+      height: 100%;
       overflow: hidden;
     }
 
@@ -75,6 +75,7 @@
     #messages {
       flex: 1;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
       padding: 20px;
       display: flex;
       flex-direction: column;
@@ -113,6 +114,7 @@
       background: #27272a;
       color: #e4e4e7;
       border-bottom-left-radius: 3px;
+      -webkit-user-select: text;
       user-select: text;
       cursor: text;
     }
@@ -308,6 +310,7 @@
 
     .sc-messages {
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
       padding: 10px 12px;
       display: flex;
       flex-direction: column;
@@ -533,12 +536,11 @@
     #tab-bar { display: none; }
 
     @media (max-width: 768px) {
-      html, body { overflow-x: hidden; }
-
-      #app { flex-direction: column; overflow-x: hidden; }
+      #app { flex-direction: column; }
 
       #main-chat {
         width: 100%;
+        max-width: 100%;
         min-width: 0;
         border-right: none;
         flex: 1;
@@ -905,17 +907,32 @@ document.addEventListener('mousedown', (e) => {
   if (!forkPopover.contains(e.target)) hidePopover();
 });
 
+let mobileForkHideTimer = null;
+
 document.addEventListener('selectionchange', () => {
   if (window.innerWidth > 768) return;
   const mobileForkBtn = document.getElementById('mobile-fork-btn');
   const sel = window.getSelection();
   const text = sel?.toString().trim();
-  if (!text || text.length < 3) { mobileForkBtn.style.display = 'none'; return; }
+
+  if (!text || text.length < 3) {
+    clearTimeout(mobileForkHideTimer);
+    mobileForkHideTimer = setTimeout(() => { mobileForkBtn.style.display = 'none'; }, 1500);
+    return;
+  }
+
   const range = sel.getRangeAt(0);
   const node = range.commonAncestorContainer;
   const bubble = (node.nodeType === Node.TEXT_NODE ? node.parentElement : node)
     ?.closest('.msg.assistant .msg-bubble');
-  if (!bubble) { mobileForkBtn.style.display = 'none'; return; }
+
+  if (!bubble) {
+    clearTimeout(mobileForkHideTimer);
+    mobileForkHideTimer = setTimeout(() => { mobileForkBtn.style.display = 'none'; }, 1500);
+    return;
+  }
+
+  clearTimeout(mobileForkHideTimer);
   pendingSelection = { text, range: range.cloneRange(), bubble };
   mobileForkBtn.style.display = '';
 });
@@ -951,6 +968,7 @@ function forkChat() {
     document.querySelector(`.sc-card[data-id="${sc.id}"]`)?.classList.remove('glow');
   });
 
+  clearTimeout(mobileForkHideTimer);
   document.getElementById('mobile-fork-btn').style.display = 'none';
   buildSubChatCard(sc);
   if (window.innerWidth <= 768) switchTab('forks');
