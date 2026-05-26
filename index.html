@@ -531,6 +531,22 @@
     ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: #52525b; }
 
+    /* ── Mobile notice ──────────────────────────────────────── */
+
+    #mobile-notice { display: none; }
+
+    @media (max-width: 768px) {
+      #mobile-notice {
+        display: block;
+        text-align: center;
+        font-size: 12px;
+        color: #52525b;
+        padding: 10px 16px;
+        border-bottom: 1px solid #27272a;
+        flex-shrink: 0;
+      }
+    }
+
     /* ── Tab bar (mobile only) ──────────────────────────────── */
 
     #tab-bar { display: none; }
@@ -638,6 +654,8 @@
       </button>
       <button id="mobile-fork-btn" class="tab-fork-btn" style="display:none" onclick="forkChat()">Fork ↗</button>
     </div>
+
+    <div id="mobile-notice">Best experienced on desktop — mobile support coming soon.</div>
 
     <div id="messages"></div>
 
