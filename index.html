@@ -542,11 +542,28 @@
         align-items: center;
         justify-content: center;
         flex: 1;
+        padding: 32px 24px;
+      }
+
+      #mobile-notice-box {
+        border: 1.5px solid #f87171;
+        border-radius: 12px;
+        background: rgba(248, 113, 113, 0.08);
+        padding: 20px 24px;
         text-align: center;
+        max-width: 320px;
+      }
+
+      #mobile-notice-box .notice-icon {
+        font-size: 22px;
+        margin-bottom: 10px;
+      }
+
+      #mobile-notice-box p {
         font-size: 15px;
+        font-weight: 500;
+        color: #fca5a5;
         line-height: 1.6;
-        color: #a1a1aa;
-        padding: 32px 28px;
       }
     }
 
@@ -658,7 +675,12 @@
       <button id="mobile-fork-btn" class="tab-fork-btn" style="display:none" onclick="forkChat()">Fork ↗</button>
     </div>
 
-    <div id="mobile-notice">Best experienced on desktop — mobile support coming soon.</div>
+    <div id="mobile-notice">
+      <div id="mobile-notice-box">
+        <div class="notice-icon">⚠️</div>
+        <p>Best experienced on desktop — mobile support coming soon.</p>
+      </div>
+    </div>
 
     <div id="messages"></div>
 
