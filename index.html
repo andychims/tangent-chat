@@ -533,17 +533,39 @@
     #tab-bar { display: none; }
 
     @media (max-width: 768px) {
+      html, body { overflow-x: hidden; }
+
+      #app { flex-direction: column; overflow-x: hidden; }
+
+      #main-chat {
+        width: 100%;
+        min-width: 0;
+        border-right: none;
+        flex: 1;
+      }
+
+      /* On forks tab, main-chat shrinks to just header+tabs */
+      #app[data-tab="forks"] #main-chat { flex: 0 0 auto; border-bottom: 1px solid #2d2d33; }
+      #app[data-tab="forks"] #messages  { display: none; }
+      #app[data-tab="forks"] #main-input-area { display: none; }
+
+      /* Right panel: hidden on main tab, fills space on forks tab */
+      #right-panel { display: none; }
+      #app[data-tab="forks"] #right-panel { display: flex; flex: 1; min-height: 0; }
+      #right-header { display: none; }
+
+      /* Tab bar */
       #tab-bar {
         display: flex;
+        align-items: center;
         background: #111113;
         border-bottom: 1px solid #2d2d33;
         flex-shrink: 0;
-        order: -1;
       }
 
       .tab-btn {
         flex: 1;
-        padding: 13px 12px;
+        padding: 11px 12px;
         background: none;
         border: none;
         border-bottom: 2px solid transparent;
@@ -559,10 +581,7 @@
         transition: color 0.15s, border-color 0.15s;
       }
 
-      .tab-btn.active {
-        color: #f4f4f5;
-        border-bottom-color: #a78bfa;
-      }
+      .tab-btn.active { color: #f4f4f5; border-bottom-color: #a78bfa; }
 
       .fork-badge {
         background: #a78bfa;
@@ -574,34 +593,25 @@
         line-height: 1.5;
       }
 
-      #app {
-        flex-direction: column;
+      .tab-fork-btn {
+        background: #a78bfa;
+        color: #111113;
+        border: none;
+        padding: 6px 13px;
+        border-radius: 6px;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        margin: 0 10px 0 auto;
+        flex-shrink: 0;
       }
-
-      #main-chat {
-        width: 100%;
-        min-width: 0;
-        border-right: none;
-      }
-
-      #right-header { display: none; }
-
-      #app[data-tab="main"] #right-panel { display: none; }
-      #app[data-tab="forks"] #main-chat { display: none; }
     }
   </style>
 </head>
 <body>
 
 <div id="app" data-tab="main">
-
-  <div id="tab-bar">
-    <button id="tab-main" class="tab-btn active" onclick="switchTab('main')">Main</button>
-    <button id="tab-forks" class="tab-btn" onclick="switchTab('forks')">
-      Forks
-      <span id="fork-badge" class="fork-badge" style="display:none">0</span>
-    </button>
-  </div>
 
   <!-- Main chat -->
   <div id="main-chat">
@@ -618,10 +628,19 @@
       </select>
     </div>
 
+    <div id="tab-bar">
+      <button id="tab-main" class="tab-btn active" onclick="switchTab('main')">Main</button>
+      <button id="tab-forks" class="tab-btn" onclick="switchTab('forks')">
+        Forks
+        <span id="fork-badge" class="fork-badge" style="display:none">0</span>
+      </button>
+      <button id="mobile-fork-btn" class="tab-fork-btn" style="display:none" onclick="forkChat()">Fork ↗</button>
+    </div>
+
     <div id="messages"></div>
 
     <div id="main-input-area">
-      <textarea id="main-input" placeholder="Message… (Enter to send, Shift+Enter for newline)" rows="1"></textarea>
+      <textarea id="main-input" placeholder="Message…" rows="1"></textarea>
       <button id="main-send-btn">Send</button>
     </div>
   </div>
@@ -886,6 +905,21 @@ document.addEventListener('mousedown', (e) => {
   if (!forkPopover.contains(e.target)) hidePopover();
 });
 
+document.addEventListener('selectionchange', () => {
+  if (window.innerWidth > 768) return;
+  const mobileForkBtn = document.getElementById('mobile-fork-btn');
+  const sel = window.getSelection();
+  const text = sel?.toString().trim();
+  if (!text || text.length < 3) { mobileForkBtn.style.display = 'none'; return; }
+  const range = sel.getRangeAt(0);
+  const node = range.commonAncestorContainer;
+  const bubble = (node.nodeType === Node.TEXT_NODE ? node.parentElement : node)
+    ?.closest('.msg.assistant .msg-bubble');
+  if (!bubble) { mobileForkBtn.style.display = 'none'; return; }
+  pendingSelection = { text, range: range.cloneRange(), bubble };
+  mobileForkBtn.style.display = '';
+});
+
 // ── Sub-chat creation ──────────────────────────────────────────────────────
 
 function forkChat() {
@@ -917,6 +951,7 @@ function forkChat() {
     document.querySelector(`.sc-card[data-id="${sc.id}"]`)?.classList.remove('glow');
   });
 
+  document.getElementById('mobile-fork-btn').style.display = 'none';
   buildSubChatCard(sc);
   if (window.innerWidth <= 768) switchTab('forks');
   updateForkBadge();
